@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مغامرة النعم – سورة النحل</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#ffe3ef;--ink:#4a1d3a;--card:#fff;--pink:#ff6fa8;--teal:#19c9c0;--gold:#ffc83d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2a1030;--ink:#fff3fa;--card:#4a2252}}
+:root[data-theme="dark"]{--bg:#2a1030;--ink:#fff3fa;--card:#4a2252}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Cairo,Tahoma,Arial,sans-serif;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;touch-action:manipulation;overflow:hidden}
+#app{position:relative;width:min(100vw,calc((100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))*16/9));aspect-ratio:16/9;font-size:16px;overflow:hidden;border-radius:.6em;box-shadow:0 .3em 1em #0004}
+canvas{width:100%;height:100%;display:block}
+#hud{position:absolute;top:0;inset-inline:0;display:flex;gap:.5em;align-items:center;padding:.35em .6em;font-weight:800;font-size:1.05em;color:#fff;text-shadow:0 .1em .15em #0006;pointer-events:none}
+#hud .pill{background:#ff6fa8cc;border:.12em solid #fff;border-radius:2em;padding:.05em .7em;white-space:nowrap}
+#hud .pill.t{background:#19c9c0cc}
+#bar{flex:1;height:.9em;background:#fff8;border-radius:1em;border:.12em solid #fff;overflow:hidden}
+#fill{height:100%;width:0;background:linear-gradient(90deg,#ffc83d,#ff9a3d);transition:width .5s}
+.ib{pointer-events:auto;background:#ffc83d;border:.12em solid #fff;border-radius:50%;width:2em;height:2em;font-size:1em;cursor:pointer}
+.scr{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:.6em;text-align:center;background:linear-gradient(160deg,#ff9cc6ee,#3fd8d0ee);color:#fff;text-shadow:0 .08em .15em #0005;padding:1em}
+.scr.on{display:flex}
+.scr h1{margin:0;font-size:2.6em}.scr h2{margin:0;font-size:2em}.scr p{margin:0;font-size:1.15em}
+.big{font-family:inherit;font-weight:800;font-size:1.5em;padding:.35em 1.4em;border:.12em solid #fff;border-radius:1em;background:linear-gradient(#ffd966,#ffb300);color:#5a2a00;cursor:pointer;box-shadow:0 .25em 0 #c27c00,0 .4em .6em #0004;min-height:2.4em}
+.big:active{transform:translateY(.15em);box-shadow:0 .1em 0 #c27c00}
+.big.alt{background:linear-gradient(#ff9cc6,#ff5c9c);color:#fff;box-shadow:0 .25em 0 #b8306b,0 .4em .6em #0004}
+.scr ul{text-align:start;font-size:1.1em;line-height:1.7;margin:0;padding-inline-start:1.2em;background:#0002;border-radius:1em;padding:.6em 1.6em}
+#nm{font-family:inherit;font-weight:800;font-size:1.5em;text-align:center;width:12em;max-width:80%;padding:.3em .6em;border:.12em solid #fff;border-radius:1em;background:#fff;color:#4a1d3a;outline:none;box-shadow:0 .2em .5em #0003}
+#nm.err{border-color:#d6336c;box-shadow:0 0 0 .2em #d6336c88}
+#q{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#2a103099}
+#q.on{display:flex}
+#qb{width:88%;max-height:94%;overflow:auto;background:var(--card);color:var(--ink);border:.2em solid #ffc83d;border-radius:1em;padding:.7em 1em;box-shadow:0 0 0 .25em #19c9c0;text-align:center}
+#qt{font-weight:800;font-size:1.35em;margin-bottom:.5em;line-height:1.5}
+#ops{display:grid;grid-template-columns:1fr 1fr;gap:.5em}
+.op{font-family:inherit;font-weight:800;font-size:1.1em;padding:.5em;border-radius:.8em;border:.12em solid #19c9c0;background:linear-gradient(#e6fffd,#b6f3ee);color:#05514c;cursor:pointer;min-height:2.6em}
+.op:disabled{opacity:.45;background:#ddd;border-color:#bbb}
+.op.ok{background:linear-gradient(#fff2b3,#ffc83d);border-color:#c27c00}
+#fb{min-height:2.4em;margin-top:.5em;font-weight:800;font-size:1.1em}
+#fb.good{color:#0a9b7a}#fb.bad{color:#d6336c}
+#ctl{position:absolute;bottom:.5em;inset-inline:.6em;display:none;justify-content:space-between;direction:ltr;pointer-events:none}
+.touch #ctl{display:flex}
+#ctl div{display:flex;gap:.5em}
+.cb{pointer-events:auto;width:4em;height:4em;border-radius:50%;border:.15em solid #fff;background:#19c9c0bb;color:#fff;font-size:1.3em;font-weight:800;touch-action:none}
+.cb.j{background:#ff6fa8cc;width:4.6em;height:4.6em}
+</style></head>
+<body>
+<div id="app">
+<canvas id="c" width="960" height="540"></canvas>
+<div id="hud">
+ <span class="pill" id="sc">⭐ 0</span><span class="pill t" id="at">المحاولات: 5</span><span class="pill" id="sg">المرحلة 1/3</span>
+ <div id="bar"><div id="fill"></div></div>
+ <button class="ib" id="mu" aria-label="الصوت">🔊</button><button class="ib" id="rs" aria-label="إعادة">↻</button>
+</div>
+<div id="ctl"><div><button class="cb" id="bl">◀</button><button class="cb" id="br">▶</button></div><button class="cb j" id="bj">قفز</button></div>
+<div id="q"><div id="qb"><div id="qt"></div><div id="ops"></div><div id="fb"></div></div></div>
+
+<div class="scr on" id="s0"><h1>🌟 مغامرة النعم 🌟</h1><p>التفسير – الصف الأول الثانوي</p><p>سورة النحل (10–18)</p>
+ <p>اكتب اسمك ليشكرك البطل في النهاية 🌸</p><input id="nm" maxlength="20" placeholder="اكتب اسمك هنا" autocomplete="off"><button class="big" id="go">ابدأ اللعب</button><button class="big alt" id="how">كيف ألعب؟</button></div>
+<div class="scr" id="s1"><h2>تعليمات اللعب</h2>
+ <ul><li>تحرّك بالأسهم ◀ ▶ أو A/D، واقفز بالمسطرة أو ▲ (أو أزرار اللمس).</li>
+ <li>اجمع النجوم الذهبية ⭐ (+10 نقاط).</li>
+ <li>عند البوابة الذهبية يظهر سؤال من الدرس: الإجابة الصحيحة تفتح الطريق وتمنحك +100 ومكافأة.</li>
+ <li>الإجابة الخاطئة تعرض تلميحاً وتنقص محاولة من 5 محاولات.</li>
+ <li>اقفز على الأعداء الغاضبين لتهزمهم، وتجنّب السقوط!</li></ul>
+ <button class="big" id="go2">فهمت! هيا نلعب</button></div>
+<div class="scr" id="s2"><h2>🎉 أحسنت! أنهيت المغامرة 🎉</h2><p id="wt"></p><p id="wn" style="font-size:1.5em;font-weight:800"></p><button class="big" id="again">أعد اللعب</button></div>
+<div class="scr" id="s3"><h2>😢 انتهت المحاولات</h2><p>راجع الدرس وحاول مرة أخرى، أنت قادر!</p><p id="lt"></p><button class="big alt" id="retry">حاول مرة أخرى</button></div>
+<div class="scr" id="s4"><h2 id="stt"></h2></div>
+</div>
+<script>
+const $=s=>document.querySelector(s),C=$('#c'),X=C.getContext('2d'),app=$('#app');
+if('ontouchstart' in window||navigator.maxTouchPoints>0)document.body.classList.add('touch');
+function fit(){app.style.fontSize=app.clientWidth/50+'px'}addEventListener('resize',fit);fit();
+// الأسئلة: [السؤال، [الصحيح أولاً، ...]، التلميح]
+const QS=[
+[['ما الحكمة من استعراض الله تعالى لهذه النعم؟',['الاستدلال بها على المنعم المستحق للعبادة وحده','بيان قدرة الإنسان على تسخير الطبيعة','تعليم الناس طرق الزراعة والصيد','بيان فضل الأنبياء على الأمم'],'💡 النعم تدلّ على المنعم، فمن أنعم وحده يُعبد وحده.'],
+ ['ما معنى كلمة ﴿تُسِيمون﴾؟',['ترعون أنعامكم','تسكنون الأرض','تزرعون الحقول','تسافرون في البر'],'💡 الإسامة: إخراج الماشية إلى المرعى.'],
+ ['أيّ النعم الآتية تُعدّ من نعم السماء؟',['المطر','الجبال','الأنهار','السفن'],'💡 فكّر فيما ينزل من السماء فيُنبت الشجر والزرع.']],
+[['ما النعمة التي امتنّ الله بها على عباده في البحر؟',['اللآلئ والحلية','الجبال الرواسي','الشجر الذي ترعاه الأنعام','المعالم التي يُهتدى بها نهاراً'],'💡 ﴿وَتَسْتَخْرِجُوا مِنْهُ حِلْيَةً﴾ ما يُستخرج للزينة.'],
+ ['ما الحكمة من خلق النجوم كما ورد في الآيات؟',['للاهتداء بها في ظلمات البر والبحر','لمعرفة مواسم الزراعة فقط','لتزيين الأرض','لمعرفة أوقات النوم'],'💡 ﴿وَبِالنَّجْمِ هُمْ يَهْتَدُونَ﴾.'],
+ ['ما معنى كلمة ﴿رَواسِي﴾؟',['الجبال المثبتات للأرض','الأنهار الجارية','الطرق التي يسلكها الناس','المعالم التي يُهتدى بها'],'💡 رسا الشيء أي ثبت واستقر.']],
+[['ما الدليل من الآيات على أن نعم الله لا تُحصى؟',['﴿وَإِن تَعُدُّوا نِعْمَةَ اللَّهِ لَا تُحْصُوهَا﴾','﴿وَسَخَّرَ لَكُمُ اللَّيْلَ وَالنَّهَارَ﴾','﴿أَفَلَا تَذَكَّرُونَ﴾','﴿لَعَلَّكُمْ تَهْتَدُونَ﴾'],'💡 ابحث عن الآية التي فيها العدّ وعدم الإحصاء.'],
+ ['ما النعمة التي جعلها الله سبباً لثبات الأرض وعدم اضطرابها؟',['الجبال','الأنهار','الشجر','النجوم'],'💡 ﴿وَأَلْقَىٰ فِي الْأَرْضِ رَوَاسِيَ أَن تَمِيدَ بِكُمْ﴾.'],
+ ['أيّ الخيارات يُعدّ من نعم البر كما ورد في الدرس؟',['الجبال والأنهار','السفن','النجوم','اللآلئ'],'💡 السفن والحلية للبحر، والنجوم للسماء، فماذا بقي على الأرض؟'],
+ ['بماذا ختم الله تعالى قوله ﴿وَإِن تَعُدُّوا نِعْمَةَ اللَّهِ لَا تُحْصُوهَا﴾؟',['إن الله لغفور رحيم','إن الإنسان لظلوم كفار','إن الله شديد العقاب','إن الله عليم حكيم'],'💡 الإنسان يقصّر في شكر النعم، فما يناسب ذلك من أسماء الله؟']]];
+const TOTAL=10,GY=440;
+// الصوت
+let AC=null,muted=false,PN='';
+function tn(f,d=.15,t='sine',v=.14,to=0,dl=0){if(muted)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),s=AC.currentTime+dl;o.type=t;o.frequency.setValueAtTime(f,s);if(to)o.frequency.exponentialRampToValueAtTime(to,s+d);g.gain.setValueAtTime(v,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.connect(g);g.connect(AC.destination);o.start(s);o.stop(s+d)}catch(e){}}
+const SFX={jump:()=>tn(380,.15,'square',.06,720),star:()=>{tn(988,.08,'triangle');tn(1319,.12,'triangle',.14,0,.07)},ok:()=>[523,659,784,1047].forEach((f,i)=>tn(f,.18,'triangle',.16,0,i*.09)),bad:()=>tn(200,.3,'sawtooth',.1,90),stomp:()=>tn(300,.12,'square',.08,120),win:()=>[523,659,784,1047,784,1047,1319].forEach((f,i)=>tn(f,.22,'triangle',.16,0,i*.12)),lose:()=>[400,330,260,180].forEach((f,i)=>tn(f,.25,'sawtooth',.09,0,i*.18)),stage:()=>[659,784,988].forEach((f,i)=>tn(f,.2,'triangle',.15,0,i*.1))};
+// الحالة
+const K={l:0,r:0,j:0};let G={run:false,paused:true},rafId=0;
+function build(n){const nq=QS[n].length,gap=[90,130,170][n],plats=[],gates=[],stars=[],en=[],segs=[];let x0=0;
+ for(let i=0;i<nq;i++){const len=560;segs.push([x0,len]);plats.push({x:x0,y:GY,w:len,h:120});
+  gates.push({x:x0+400,y:GY-120,w:36,h:120,open:false,q:QS[n][i]});
+  const px=x0+120;plats.push({x:px,y:GY-100-n*10,w:110,h:18});
+  for(let k=0;k<4;k++)stars.push({x:px+15+k*27,y:GY-100-n*10-30,t:0});
+  for(let k=0;k<3;k++)stars.push({x:x0+240+k*40,y:GY-40-Math.sin(k*1.6)*50,t:0});
+  if(n>0&&(n==2||i>0))en.push({x:x0+260,y:GY-30,w:34,h:30,a:x0+170,b:x0+370,d:1,sp:n==2?1.8:1.2});
+  if(n<2){plats.push({x:x0+len+gap/2-45,y:GY-70,w:90,h:16});stars.push({x:x0+len+gap/2,y:GY-110,t:0})}
+  stars.push({x:x0+len+gap/2,y:GY-150-n*10,t:0});
+  x0+=len+gap}
+ segs.push([x0,520]);plats.push({x:x0,y:GY,w:520,h:120});
+ for(let k=0;k<3;k++)stars.push({x:x0+100+k*40,y:GY-40,t:0});
+ return{plats,gates,stars,en,segs,flag:x0+400,L:x0+520}}
+function load(n){const b=build(n);Object.assign(G,b,{stage:n,run:true,paused:false,parts:[],txt:[],p:{x:60,y:GY-60,w:32,h:44,vx:0,vy:0,on:false,f:1,coy:0,jl:0,inv:0},cp:40,cam:0,t:0,asking:false});hud()}
+function newGame(){['s0','s1','s2','s3','s4'].forEach(i=>$('#'+i).classList.remove('on'));G.score=0;G.att=5;G.ans=0;load(0);bar()}
+function hud(){$('#sc').textContent='⭐ '+G.score;$('#at').textContent='المحاولات: '+'❤️'.repeat(Math.max(0,G.att));$('#sg').textContent='المرحلة '+(G.stage+1)+'/3'}
+function bar(){$('#fill').style.width=(G.ans/TOTAL*100)+'%'}
+function show(id){document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id==id))}
+// الأسئلة
+function ask(g){G.paused=true;G.asking=true;K.l=K.r=K.j=0;const[q,o,h]=g.q;$('#qt').textContent=q;$('#fb').textContent='';$('#fb').className='';
+ const ops=$('#ops');ops.innerHTML='';
+ o.map((t,i)=>({t,c:i==0})).sort(()=>Math.random()-.5).forEach(it=>{const b=document.createElement('button');b.className='op';b.textContent=it.t;
+  b.onclick=()=>{if(!G.asking)return;if(it.c){G.asking=false;b.classList.add('ok');ops.querySelectorAll('button').forEach(x=>x.disabled=true);
+    G.score+=100;G.ans++;g.open=true;SFX.ok();$('#fb').textContent='🎉 إجابة صحيحة! +100 نقطة ومكافأة نجوم!';$('#fb').className='good';hud();bar();
+    for(let k=0;k<6;k++)G.stars.push({x:g.x-30-k*22,y:GY-60-(k%3)*28,t:0});confetti(g.x,GY-100,60);
+    setTimeout(()=>{$('#q').classList.remove('on');G.paused=false},1300)}
+   else{b.disabled=true;G.att--;SFX.bad();hud();$('#fb').className='bad';
+    if(G.att<=0){G.asking=false;$('#fb').textContent='انتهت المحاولات!';setTimeout(lose,1100)}else $('#fb').textContent=h+'  (حاول مرة أخرى)'}};
+  ops.appendChild(b)});$('#q').classList.add('on')}
+function lose(){$('#q').classList.remove('on');G.run=false;SFX.lose();$('#lt').textContent='لا بأس يا '+PN+'، نقاطك: '+G.score+' — أجبت على '+G.ans+' من '+TOTAL;show('s3')}
+function win(){G.run=false;SFX.win();const s=G.att>=4?'⭐⭐⭐':G.att>=2?'⭐⭐':'⭐';$('#wt').textContent=s+'  نقاطك: '+G.score+' — المحاولات المتبقية: '+G.att;$('#wn').textContent='🌸 شكراً لك يا '+PN+' على مغامرتك الجميلة، بارك الله فيك وفي علمك! 🌸';show('s2');G.winT=1;confetti(0,0,0)}
+function confetti(x,y,n){const c=['#ff6fa8','#19c9c0','#ffc83d','#fff'];for(let i=0;i<n;i++)G.parts.push({x,y,vx:(Math.random()-.5)*10,vy:-Math.random()*10-2,l:70,c:c[i%4],s:3+Math.random()*4})}
+function txt(t,x,y){G.txt.push({t,x,y,l:50})}
+// الفيزياء
+const hit=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
+function respawn(){const p=G.p;p.x=G.cp;p.y=GY-60;p.vx=p.vy=0;p.inv=60}
+function upd(){G.t++;
+ if(G.winT){if(G.t%6==0){const c=['#ff6fa8','#19c9c0','#ffc83d'];for(let i=0;i<5;i++)G.parts.push({x:G.cam+Math.random()*960,y:-10,vx:(Math.random()-.5)*2,vy:Math.random()*2+1,l:120,c:c[i%3],s:5})}}
+ if(G.run&&!G.paused){const p=G.p,d=K.r-K.l;p.vx=d*4.8;if(d)p.f=d;
+  p.coy=p.on?7:p.coy-1;if(K.j&&p.coy>0&&!p.jl){p.vy=-14;p.on=false;p.coy=0;p.jl=1;SFX.jump()}if(!K.j)p.jl=0;
+  p.vy=Math.min(p.vy+.64,16);if(p.inv>0)p.inv--;
+  const S=G.plats.concat(G.gates.filter(g=>!g.open));
+  p.x+=p.vx;if(p.x<0)p.x=0;for(const s of S)if(hit(p,s)){if(p.vx>0)p.x=s.x-p.w;else if(p.vx<0)p.x=s.x+s.w}
+  p.on=false;p.y+=p.vy;for(const s of S)if(hit(p,s)){if(p.vy>0){p.y=s.y-p.h;p.on=true}else p.y=s.y+s.h;p.vy=0}
+  if(p.on)for(const s of G.segs)if(p.x>s[0]&&p.x<s[0]+s[1]){G.cp=Math.max(G.cp,s[0]+40)}
+  if(p.y>680){respawn()}
+  for(const g of G.gates)if(!g.open&&p.x+p.w>=g.x-4&&p.x<g.x){ask(g);return}
+  for(const s of G.stars)if(!s.got&&Math.hypot(s.x-(p.x+16),s.y-(p.y+22))<30){s.got=1;G.score+=10;SFX.star();hud();confetti(s.x,s.y,5)}
+  for(const e of G.en){if(e.dead)continue;e.x+=e.d*e.sp;if(e.x<e.a||e.x>e.b)e.d*=-1;
+   if(hit(p,e)){if(p.vy>0&&p.y+p.h-p.vy<=e.y+12){e.dead=1;p.vy=-9;G.score+=50;SFX.stomp();hud();txt('+50',e.x,e.y);confetti(e.x,e.y,12)}
+    else if(!p.inv){p.inv=70;p.vy=-8;p.x+=(p.x<e.x?-1:1)*50;G.score=Math.max(0,G.score-10);SFX.bad();hud();txt('-10',p.x,p.y)}}}
+  if(p.x>G.flag){if(G.stage==2)win();else{SFX.stage();$('#stt').textContent='🎊 اكتملت المرحلة '+(G.stage+1)+'! 🎊';show('s4');G.run=false;confetti(0,0,0);const n=G.stage+1;setTimeout(()=>{show('');G.run=true;load(n)},1600)}}
+  G.cam=Math.max(0,Math.min(G.L-960,p.x-320))}
+ G.parts=G.parts.filter(q=>(q.x+=q.vx,q.y+=q.vy,q.vy+=.25,--q.l>0));G.txt=G.txt.filter(q=>(q.y-=.8,--q.l>0))}
+// الرسم
+function rr(x,y,w,h,r){X.beginPath();X.roundRect?X.roundRect(x,y,w,h,r):X.rect(x,y,w,h)}
+function star(x,y,r,col){X.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,q=i%2?r*.45:r;X.lineTo(x+Math.cos(a)*q,y+Math.sin(a)*q)}X.closePath();X.fillStyle=col;X.fill()}
+function box(s,top,front,side){const d=14;X.fillStyle=front;X.fillRect(s.x,s.y,s.w,s.h);
+ X.fillStyle=side;X.beginPath();X.moveTo(s.x+s.w,s.y);X.lineTo(s.x+s.w+d,s.y-d);X.lineTo(s.x+s.w+d,s.y+s.h-d);X.lineTo(s.x+s.w,s.y+s.h);X.fill();
+ X.fillStyle=top;X.beginPath();X.moveTo(s.x,s.y);X.lineTo(s.x+d,s.y-d);X.lineTo(s.x+s.w+d,s.y-d);X.lineTo(s.x+s.w,s.y);X.fill()}
+function draw(){const cam=G.cam||0,t=G.t||0;
+ const g=X.createLinearGradient(0,0,0,540);g.addColorStop(0,'#ffb3d1');g.addColorStop(.6,'#c8f7f3');g.addColorStop(1,'#7fe5dc');X.fillStyle=g;X.fillRect(0,0,960,540);
+ X.fillStyle='#fff9';for(let i=0;i<7;i++){const cx=((i*330-cam*.2)%2300+2300)%2300-200,cy=60+(i%3)*45;X.beginPath();X.arc(cx,cy,28,0,7);X.arc(cx+30,cy-12,34,0,7);X.arc(cx+65,cy,26,0,7);X.fill()}
+ for(let i=0;i<8;i++){const cx=((i*300-cam*.45)%2400+2400)%2400-200;X.fillStyle=i%2?'#ff9cc688':'#19c9c066';X.beginPath();X.arc(cx,470,120+(i%3)*30,Math.PI,0);X.fill()}
+ if(!G.plats)return;X.save();X.translate(-cam,0);
+ for(const s of G.plats){if(s.h>100){box(s,'#5ff0e6','#ff8ab9','#d9588e');X.fillStyle='#ffffff55';for(let k=s.x+20;k<s.x+s.w;k+=60){X.beginPath();X.arc(k,GY+50,10,0,7);X.fill()}}else box(s,'#ffe27a','#ffb300','#c27c00')}
+ for(const s of G.stars)if(!s.got){const y=s.y+Math.sin(t/12+s.x)*4;X.save();X.shadowColor='#ffc83d';X.shadowBlur=12;star(s.x,y,13,'#ffc83d');X.restore();star(s.x-1,y-1,7,'#fff3a8')}
+ for(const gt of G.gates){if(gt.open){X.globalAlpha=.25}box(gt,'#ffe27a','#ff6fa8','#b8306b');X.fillStyle='#ffc83d';X.font='800 40px Cairo,sans-serif';X.textAlign='center';X.fillText('؟',gt.x+18,gt.y+60);X.globalAlpha=1}
+ for(const e of G.en)if(!e.dead){X.fillStyle='#00000030';X.beginPath();X.ellipse(e.x+17,e.y+31,18,5,0,0,7);X.fill();const gr=X.createRadialGradient(e.x+12,e.y+8,3,e.x+17,e.y+15,24);gr.addColorStop(0,'#b57bff');gr.addColorStop(1,'#6a2fb8');X.fillStyle=gr;rr(e.x,e.y,34,30,12);X.fill();
+  X.fillStyle='#fff';X.beginPath();X.arc(e.x+10,e.y+12,5,0,7);X.arc(e.x+24,e.y+12,5,0,7);X.fill();X.fillStyle='#222';X.fillRect(e.x+8,e.y+11,4,4);X.fillRect(e.x+22,e.y+11,4,4);X.strokeStyle='#222';X.lineWidth=2.5;X.beginPath();X.moveTo(e.x+4,e.y+5);X.lineTo(e.x+14,e.y+9);X.moveTo(e.x+30,e.y+5);X.lineTo(e.x+20,e.y+9);X.stroke()}
+ // العلم
+ X.fillStyle='#fff';X.fillRect(G.flag,GY-130,6,130);X.fillStyle='#ff6fa8';X.beginPath();X.moveTo(G.flag+6,GY-130);X.lineTo(G.flag+60+Math.sin(t/8)*5,GY-110);X.lineTo(G.flag+6,GY-90);X.fill();star(G.flag+26,GY-110,9,'#ffc83d');
+ // الشخصية
+ const p=G.p;if(p&&!(p.inv&&t%6<3)){const cx=p.x+16,by=p.y+p.h,sq=p.on?1:1.1;X.fillStyle='#00000030';X.beginPath();X.ellipse(cx,by+2,18,5,0,0,7);X.fill();
+  X.save();X.translate(cx,by);X.scale(1/sq,sq);const gr=X.createRadialGradient(-6,-34,3,0,-22,26);gr.addColorStop(0,'#8ff5ee');gr.addColorStop(1,'#10a39b');X.fillStyle=gr;X.beginPath();X.ellipse(0,-22,19,22,0,0,7);X.fill();
+  X.fillStyle='#fff';X.beginPath();X.arc(-6+p.f*4,-28,6,0,7);X.arc(8+p.f*4,-28,6,0,7);X.fill();X.fillStyle='#222';X.beginPath();X.arc(-4+p.f*6,-28,3,0,7);X.arc(10+p.f*6,-28,3,0,7);X.fill();
+  X.fillStyle='#ff8ab9';X.beginPath();X.arc(-12,-18,4,0,7);X.arc(14,-18,4,0,7);X.fill();X.strokeStyle='#7a2b4a';X.lineWidth=2;X.beginPath();X.arc(1,-20,5,.2,Math.PI-.2);X.stroke();
+  X.fillStyle='#ffc83d';X.beginPath();X.moveTo(-12,-40);X.lineTo(-9,-54);X.lineTo(-3,-44);X.lineTo(2,-56);X.lineTo(7,-44);X.lineTo(13,-54);X.lineTo(14,-40);X.fill();X.restore()}
+ for(const q of G.parts){X.fillStyle=q.c;X.fillRect(q.x,q.y,q.s,q.s)}
+ X.font='800 24px Cairo,sans-serif';X.fillStyle='#ff3d86';X.strokeStyle='#fff';X.lineWidth=4;for(const q of G.txt){X.strokeText(q.t,q.x,q.y);X.fillText(q.t,q.x,q.y)}
+ X.restore()}
+function loop(){upd();draw();requestAnimationFrame(loop)}
+// تحكم
+const km={ArrowLeft:'l',a:'l',A:'l',ArrowRight:'r',d:'r',D:'r',' ':'j',ArrowUp:'j',w:'j',W:'j'};
+addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(km[e.key]){K[km[e.key]]=1;e.preventDefault()}});addEventListener('keyup',e=>{if(km[e.key])K[km[e.key]]=0});
+[['bl','l'],['br','r'],['bj','j']].forEach(([id,k])=>{const b=$('#'+id);b.addEventListener('pointerdown',e=>{e.preventDefault();K[k]=1;b.setPointerCapture(e.pointerId)});['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>K[k]=0));b.oncontextmenu=e=>e.preventDefault()});
+function begin(){const n=$('#nm'),v=n.value.trim();if(!v){n.classList.add('err');n.placeholder='اكتب اسمك أولاً 😊';n.focus();show('s0');return}n.classList.remove('err');PN=v;newGame()}
+$('#go').onclick=begin;$('#go2').onclick=()=>PN?newGame():begin();$('#nm').addEventListener('keydown',e=>{if(e.key==='Enter')begin()});$('#again').onclick=newGame;$('#retry').onclick=newGame;$('#how').onclick=()=>show('s1');
+$('#rs').onclick=()=>{$('#q').classList.remove('on');newGame()};
+$('#mu').onclick=()=>{muted=!muted;$('#mu').textContent=muted?'🔇':'🔊'};
+G={run:false,paused:true,t:0,cam:0,parts:[],txt:[],plats:[],gates:[],stars:[],en:[],segs:[],flag:-999,L:960,p:null,score:0,att:5,ans:0};
+loop();
+</script></body></html>
